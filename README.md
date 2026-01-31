@@ -67,7 +67,7 @@
 2. On your project root, you need a system.properties file.
 
 3. put the following line in system.properties files.
-java.runtime.version=18
+java.runtime.version=23
 
 4. git add *
 
