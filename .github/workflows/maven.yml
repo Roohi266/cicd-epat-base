@@ -2,12 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-  build-and-test:
+  build-test-and-scan:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,16 +18,24 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '23'
+          java-version: "23"
           cache: maven
 
-      - name: Build + test
-        run: mvn -B clean verify
+      - name: Build, test, and generate JaCoCo report
+        run: mvn -B clean test jacoco:report
 
-      - name: Upload JaCoCo report
+      - name: SonarCloud Scan
+        run: mvn -B sonar:sonar \
+          -Dsonar.projectKey=Roohi266_cicd-epat-base \
+          -Dsonar.organization=roohi266 \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload JaCoCo report artifact
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
           path: target/site/jacoco
-
 
