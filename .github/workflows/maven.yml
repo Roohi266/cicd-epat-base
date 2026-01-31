@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 23
         uses: actions/setup-java@v4
@@ -25,17 +27,18 @@ jobs:
         run: mvn -B clean test jacoco:report
 
       - name: SonarCloud Scan
-        run: mvn -B sonar:sonar \
-          -Dsonar.projectKey=Roohi266_cicd-epat-base \
-          -Dsonar.organization=roohi266 \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn -B sonar:sonar \
+            -Dsonar.projectKey=Roohi266_cicd-epat-base \
+            -Dsonar.organization=roohi266 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=${SONAR_TOKEN} \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
       - name: Upload JaCoCo report artifact
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
           path: target/site/jacoco
-

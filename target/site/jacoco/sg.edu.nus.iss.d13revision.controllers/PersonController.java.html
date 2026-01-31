@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PersonController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">d13revision</a> &gt; <a href="index.source.html" class="el_package">sg.edu.nus.iss.d13revision.controllers</a> &gt; <span class="el_source">PersonController.java</span></div><h1>PersonController.java</h1><pre class="source lang-java linenums">package sg.edu.nus.iss.d13revision.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.*;
+
+import sg.edu.nus.iss.d13revision.models.Person;
+import sg.edu.nus.iss.d13revision.models.PersonForm;
+import sg.edu.nus.iss.d13revision.services.PersonService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+@RequestMapping(path=&quot;/person&quot;)
+<span class="fc" id="L19">public class PersonController {</span>
+<span class="fc" id="L20">    private List&lt;Person&gt; personList = new ArrayList&lt;Person&gt;();</span>
+
+    @Autowired
+    PersonService perSvc;
+
+    @Value(&quot;${welcome.message}&quot;)
+    private String message;
+
+    @Value(&quot;${error.message}&quot;)
+    private String errorMessage;
+
+    // @RequestMapping(value = { &quot;/&quot;, &quot;/home&quot;, &quot;/index&quot; }, method = RequestMethod.GET)
+    @GetMapping(value = { &quot;/&quot;, &quot;/home&quot;, &quot;/index&quot; })
+    public String index(Model model) {
+<span class="fc" id="L34">        model.addAttribute(&quot;message&quot;, message);</span>
+
+<span class="fc" id="L36">        return &quot;index&quot;;</span>
+    }
+
+    //@RequestMapping(value = &quot;/testRetrieve&quot;, method = RequestMethod.GET, produces = &quot;application/json&quot;)
+    @GetMapping(value = &quot;/testRetrieve&quot;, produces = &quot;application/json&quot;)
+    public @ResponseBody List&lt;Person&gt; getAllPersons() {
+<span class="fc" id="L42">        personList = perSvc.getPersons();</span>
+
+<span class="fc" id="L44">        return personList;</span>
+    }
+
+    //@RequestMapping(value = &quot;/personList&quot;, method = RequestMethod.GET)
+    @GetMapping(value = &quot;/personList&quot;)
+    public String personList(Model model) {
+<span class="fc" id="L50">        personList = perSvc.getPersons();</span>
+<span class="fc" id="L51">        model.addAttribute(&quot;persons&quot;, personList);</span>
+
+<span class="fc" id="L53">        return &quot;personList&quot;;</span>
+    }
+
+    //@RequestMapping(value = &quot;/addPerson&quot;, method = RequestMethod.GET)
+    @GetMapping(value = &quot;/addPerson&quot;)
+    public String showAddPersonPage(Model model) {
+<span class="fc" id="L59">        PersonForm pForm = new PersonForm();</span>
+<span class="fc" id="L60">        model.addAttribute(&quot;personForm&quot;, pForm);</span>
+
+<span class="fc" id="L62">        return &quot;addPerson&quot;;</span>
+    }
+
+    //@RequestMapping(value = &quot;/addPerson&quot;, method = RequestMethod.POST)
+    @PostMapping(value = &quot;/addPerson&quot;)
+    public String savePerson(Model model,
+            @ModelAttribute(&quot;personForm&quot;) PersonForm personForm) {
+
+<span class="fc" id="L70">        String fName = personForm.getFirstName();</span>
+<span class="fc" id="L71">        String lName = personForm.getLastName();</span>
+
+<span class="pc bpc" id="L73" title="3 of 8 branches missed.">        if (fName != null &amp;&amp; fName.length() &gt; 0 &amp;&amp; lName != null &amp;&amp; lName.length() &gt; 0) {</span>
+<span class="fc" id="L74">            Person newPerson = new Person(fName, lName);</span>
+<span class="fc" id="L75">            perSvc.addPerson(newPerson);</span>
+
+<span class="fc" id="L77">            return &quot;redirect:/person/personList&quot;;</span>
+        }
+
+<span class="fc" id="L80">        model.addAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+<span class="fc" id="L81">        return &quot;addPerson&quot;;</span>
+    }
+
+    @RequestMapping(value=&quot;/personToEdit&quot;, method=RequestMethod.POST)
+    public String personToEdit(@ModelAttribute(value=&quot;per&quot;) Person p, Model model) {
+<span class="fc" id="L86">        model.addAttribute(&quot;per&quot;, p);</span>
+<span class="fc" id="L87">        return &quot;editPerson&quot;;</span>
+    }
+
+    @RequestMapping(value=&quot;/personEdit&quot;, method = RequestMethod.POST)
+    public String personEdit(@ModelAttribute(value=&quot;per&quot;) Person p, Model model) {
+<span class="fc" id="L92">        perSvc.updatePerson(p);</span>
+<span class="fc" id="L93">        return &quot;redirect:/person/personList&quot;;</span>
+    }
+
+    @RequestMapping(value=&quot;/personDelete&quot;, method = RequestMethod.POST)
+    public String personDelete(@ModelAttribute(value=&quot;per&quot;) Person p, Model model) {
+<span class="fc" id="L98">        perSvc.removePerson(p);</span>
+<span class="fc" id="L99">        return &quot;redirect:/person/personList&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
